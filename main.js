@@ -19,32 +19,76 @@ class InputHandler {
 class Owlbear {
     constructor(game) {
         this.game = game;
-        this.width = 100;
-        this.height = 100;
+        this.spriteWidth = 200;
+        this.spriteHeight = 200;
+        this.frameX = 0;
+        this.frameY = 0;
+        this.maxFrame = 30;
+        this.width = this.spriteWidth;
+        this.height = this.spriteHeight;
         this.x = 200;
         this.y = 200;
         this.speedX = 0;
         this.speedY = 0;
         this.maxSpeed = 3;
+        this.image = document.getElementById('owlbear');
     }
 
     draw(context) {
-        context.fillRect(this.x, this.y, this.width, this.height);
+        context.drawImage(
+            this.image,
+            this.frameX * this.spriteWidth,
+            this.frameY * this.spriteHeight,
+            this.spriteWidth,
+            this.spriteHeight,
+            this.x,
+            this.y,
+            this.width,
+            this.height
+        );
     }
 
     update() {
         switch (this.game.lastKey) {
             case 'PArrowLeft':
                 this.setSpeed(-this.maxSpeed, 0);
+                this.frameY = 3;
+                break;
+            case 'RArrowLeft':
+                if (this.speedX < 0) {
+                    this.setSpeed(0, 0);
+                    this.frameY = 2;
+                }
                 break;
             case 'PArrowRight':
                 this.setSpeed(this.maxSpeed, 0);
+                this.frameY = 5;
+                break;
+            case 'RArrowRight':
+                if (this.speedX > 0) {
+                    this.setSpeed(0, 0);
+                    this.frameY = 4;
+                }
                 break;
             case 'PArrowUp':
-                this.setSpeed(0, -this.maxSpeed);
+                this.setSpeed(0, -this.maxSpeed * 0.6);
+                this.frameY = 7;
+                break;
+            case 'RArrowUp':
+                if (this.speedY < 0) {
+                    this.setSpeed(0, 0);
+                    this.frameY = 6;
+                }
                 break;
             case 'PArrowDown':
-                this.setSpeed(0, this.maxSpeed);
+                this.setSpeed(0, this.maxSpeed * 0.6);
+                this.frameY = 1;
+                break;
+            case 'RArrowDown':
+                if (this.speedY > 0) {
+                    this.setSpeed(0, 0);
+                    this.frameY = 0;
+                }
                 break;
             default:
                 this.setSpeed(0, 0);
@@ -65,6 +109,13 @@ class Owlbear {
         }
         if (this.y > this.game.height - this.height) {
             this.y = this.game.height - this.height;
+        }
+
+        //sprite animation
+        if (this.frameX < this.maxFrame) {
+            this.frameX++;
+        } else {
+            this.frameX = 0;
         }
     }
 

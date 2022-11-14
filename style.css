@@ -66,3 +66,7 @@ canvas:hover ~ #leaves_right {
     75% { top: 55px; }
     100% { top: 50px; }
 }
+
+#owlbear {
+    display: none;
+}
