@@ -67,6 +67,6 @@ canvas:hover ~ #leaves_right {
     100% { top: 50px; }
 }
 
-#owlbear {
+#owlbear, #bush, #plant, #grass {
     display: none;
 }

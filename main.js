@@ -30,8 +30,11 @@ class Owlbear {
         this.y = 200;
         this.speedX = 0;
         this.speedY = 0;
-        this.maxSpeed = 3;
+        this.maxSpeed = 2;
         this.image = document.getElementById('owlbear');
+        this.fps = 60;
+        this.frameInterval = 1000 / this.fps;
+        this.frameTimer = 0;
     }
 
     draw(context) {
@@ -48,7 +51,7 @@ class Owlbear {
         );
     }
 
-    update() {
+    update(deltaTime) {
         switch (this.game.lastKey) {
             case 'PArrowLeft':
                 this.setSpeed(-this.maxSpeed, 0);
@@ -112,10 +115,11 @@ class Owlbear {
         }
 
         //sprite animation
-        if (this.frameX < this.maxFrame) {
-            this.frameX++;
+        if (this.frameTimer > this.frameInterval) {
+            this.frameX < this.maxFrame ? this.frameX++ : this.frameX = 0;
+            this.frameTimer = 0;
         } else {
-            this.frameX = 0;
+            this.frameTimer += deltaTime;
         }
     }
 
@@ -125,7 +129,47 @@ class Owlbear {
     }
 }
 
-class Plant { }
+class Obstacle {
+    constructor(game, imageWidth, imageHeight) {
+        this.game = game;
+        this.width = imageWidth;
+        this.height = imageHeight;
+        this.x = Math.random() * this.game.width - this.width;
+        this.y = this.game.topMargin + Math.random() * (this.game.height - this.height - this.game.topMargin);
+    }
+
+    draw(context) {
+        context.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+
+    update() {
+
+    }
+}
+
+class Bush extends Obstacle {
+    constructor(game) {
+        super(game, 216, 100);
+        this.game = game;
+        this.image = document.getElementById('bush');
+    }
+}
+
+class Plant extends Obstacle {
+    constructor(game) {
+        super(game, 212, 118);
+        this.game = game;
+        this.image = document.getElementById('plant');
+    }
+}
+
+class Grass extends Obstacle {
+    constructor(game) {
+        super(game, 103, 183);
+        this.game = game;
+        this.image = document.getElementById('grass');
+    }
+}
 
 class Game {
     constructor(width, height) {
@@ -135,21 +179,45 @@ class Game {
         this.input = new InputHandler(this);
         this.owlbear = new Owlbear(this);
         this.topMargin = 175;
+        this.numberOfObstacles = 10;
+        this.obstacles = [];
+        this.gameObjects = [];
     }
 
-    render(context) {
-        this.owlbear.draw(context);
-        this.owlbear.update();
+    render(context, deltaTime) {
+        this.gameObjects = [this.owlbear, ...this.obstacles];
+        this.gameObjects.sort((a, b) => (a.y + a.height) - (b.y + b.height));
+        this.gameObjects.forEach(object => {
+            object.draw(ctx);
+            object.update(deltaTime);
+        })
+    }
+
+    init() {
+        for (let i = 0; i < this.numberOfObstacles; i++) {
+            const randomNumber = Math.random();
+            if (randomNumber < 0.3) {
+                this.obstacles.push(new Bush(this));
+            } else if (randomNumber < 0.6) {
+                this.obstacles.push(new Plant(this));
+            } else {
+                this.obstacles.push(new Grass(this));
+            }
+        }
     }
 }
 
-const game = new Game(canvas.width,canvas.height);
-console.log(game);
+const game = new Game(canvas.width, canvas.height);
+game.init();
 
-function animate() {
+let lastTime = 0;
+
+function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime;
+    lastTime = timeStamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.render(ctx);
+    game.render(ctx, deltaTime);
     requestAnimationFrame(animate);
 }
 
-animate();
+animate(0);
